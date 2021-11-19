@@ -1,6 +1,7 @@
 
-const http=require('http');
-const fs=require('fs');
+import http from 'http'
+import fs from 'fs'
+import { parse } from 'querystring';
 
 http.createServer((req,res)=>{
     if(req.method==="GET" && req.url==='/')
@@ -9,11 +10,32 @@ http.createServer((req,res)=>{
         try{
             const data1 = fs.readFileSync('./EmployeeDetails.html', 'utf8')
             const data2 = fs.readFileSync('./employeedetails.txt', 'utf8')
-            const arr=data2.split('\n')
-            
+            const arr=parse(data2.toString())
             res.write(data1);
-            for(let i of arr){
-                res.write(`<br/>${i}`)
+            
+                for(let i=0;i<arr.Name.length;i++){
+                res.write(`
+                <html>
+                <head>
+                <style>div{
+                    margin-left: 40%;
+                    margin-right: 40%;
+                }</style>
+                </head>
+                <body>
+                <div>
+                <table border="1">
+                    <tr>
+                    <td width="100px">${i}</td>
+                    <td width="100px">${arr.Name[i]}</td>
+                    <td width="100px">${arr.Age[i]}</td>
+                    <td width="100px">${arr.city[i]}</td>
+                    <td width="100px">${arr.Salary[i]}</td></tr>
+                </table>
+                </div>
+                </body>
+                </html>
+                `)
             }
             res.end()
         }
@@ -32,7 +54,7 @@ http.createServer((req,res)=>{
     else if(req.method==="POST" && req.url==='/'){
         var body = "";
         req.on("data", function (data) {
-            body += data;
+            body += data; 
         });
             fs.readFile('./employeedetails.txt',(err,empdata)=>{
                 if(empdata.length==0){
@@ -43,7 +65,7 @@ http.createServer((req,res)=>{
                     })
                 }
                 else{
-                    fs.appendFile('./employeedetails.txt',`\n${body}`,(err)=>{
+                    fs.appendFile('./employeedetails.txt',`&${body}`,(err)=>{
                         if(err) throw err;
                         res.writeHead(301,{Location:'/'})
                         res.end()
